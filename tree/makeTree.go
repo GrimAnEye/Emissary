@@ -1,14 +1,14 @@
 package tree
 
 import (
-	c "Emissary/configs"
 	"fmt"
 	"strings"
+
+	c "Emissary/configs"
 )
 
 // MakeTree - формирует дерево из массива пользователей
 func MakeTree(users []c.LdapAttributes) (tree c.Branch) {
-
 	fmt.Println("Формирую дерево пользователей по отделам")
 
 	// Перебираем массив пользователей
@@ -19,7 +19,6 @@ func MakeTree(users []c.LdapAttributes) (tree c.Branch) {
 
 		// Перебираем OU пользователя
 		for i := 0; i < len(user.OUs); i++ {
-
 			if _, ok := currentBranch.Branch[user.OUs[i]]; !ok {
 				// Если нужной ветви нет - создаем её и назначаем текущей ("садимся на неё")
 				currentBranch = addBranch(currentBranch, user.OUs[i])
@@ -30,9 +29,7 @@ func MakeTree(users []c.LdapAttributes) (tree c.Branch) {
 		}
 		// Когда созданы все нужные ветви - добавляем на неё должность ("листья")
 		addUser(currentBranch, &user)
-
 	}
-
 	return tree
 }
 

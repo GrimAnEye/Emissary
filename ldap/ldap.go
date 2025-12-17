@@ -1,26 +1,36 @@
 package ldap
 
 import (
-	c "Emissary/configs"
 	"fmt"
 	"strings"
+
+	c "Emissary/configs"
 
 	ldap "github.com/go-ldap/ldap/v3"
 )
 
+// Список возвращаемых атрибутов
+var requestAttributes = []string{
+	"description",
+	"telephoneNumber",
+	"otherTelephone",
+	"mobile",
+	"otherMobile",
+	"mail",
+}
+
 // GetUsersFromLdap - запрашивает пользователей из LDAP и возвращает их список
 func GetUsersFromLdap() (users []c.LdapAttributes, err error) {
-
 	fmt.Println("Подключаюсь к LDAP")
 
-	//Формирование подключения к ldap
+	// Формирование подключения к ldap
 	l, err := ldap.Dial("tcp", c.LdapServer)
 	if err != nil {
 		return nil, err
 	}
 	defer l.Close()
 
-	//Использование УЗ для подключения
+	// Использование УЗ для подключения
 	err = l.Bind(
 		// Проверка наличия домена LDAP. Если он есть, использовать с логином
 		func() string {
@@ -32,26 +42,22 @@ func GetUsersFromLdap() (users []c.LdapAttributes, err error) {
 		}(),
 
 		c.Pass)
-
 	if err != nil {
 		return nil, err
 	}
 
-	//Создание запроса в AD
+	// Создание запроса в AD
 	searchRequest := ldap.NewSearchRequest(
 		c.LdapBaseDn,
 		ldap.ScopeWholeSubtree, ldap.NeverDerefAliases, 0, 0, false,
 		c.LdapFilter,
-		[]string{
-			"description", "telephoneNumber",
-			"otherTelephone", "mobile", "otherMobile",
-		}, // Список возвращаемых атрибутов
+		requestAttributes,
 		nil,
 	)
 
 	fmt.Println("Запрашиваю пользователей")
 
-	//Выполнение запроса в AD
+	// Выполнение запроса в AD
 	sr, err := l.Search(searchRequest)
 	if err != nil {
 		return nil, err
@@ -70,10 +76,9 @@ func GetUsersFromLdap() (users []c.LdapAttributes, err error) {
 		user.Position = entry.GetAttributeValue("description")
 
 		// Суммирую все контактные данные пользователя
-		user.Contacts = append(user.Contacts, entry.GetAttributeValues("telephoneNumber")...)
-		user.Contacts = append(user.Contacts, entry.GetAttributeValues("otherTelephone")...)
-		user.Contacts = append(user.Contacts, entry.GetAttributeValues("mobile")...)
-		user.Contacts = append(user.Contacts, entry.GetAttributeValues("otherMobile")...)
+		for _, attr := range requestAttributes {
+			user.Contacts = append(user.Contacts, entry.GetAttributeValues(attr)...)
+		}
 
 		// Разбираю DN строку для получения имени и каталогов пользователя
 		dn := strings.TrimSuffix(entry.DN, ","+c.LdapBaseDn) // Отрезаю BaseDn

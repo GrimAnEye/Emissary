@@ -1,14 +1,14 @@
 package tree
 
 import (
-	c "Emissary/configs"
 	"fmt"
 	"os"
+
+	c "Emissary/configs"
 )
 
-//PrintTree - печатает дерево пользователей в файл
+// PrintTree - печатает дерево пользователей в файл
 func PrintTree(tree *c.Branch) error {
-
 	file, err := os.Create(c.Output)
 	if err != nil {
 		return err
@@ -74,13 +74,11 @@ func initFile(file *os.File, isStart bool) error {
 	if _, err := file.WriteString(
 		// В зависимости от того, начало это документа или конец - записывать разные шаблоны
 		func() string {
-
 			if isStart {
 				return top
 			} else {
 				return bottom
 			}
-
 		}()); err != nil {
 		return err
 	}
@@ -89,7 +87,6 @@ func initFile(file *os.File, isStart bool) error {
 
 // printBranch - перебирает подвертви, печатает их название и вызывает печать пользователей
 func printBranch(branch *c.Branch, file *os.File, isStart bool) error {
-
 	if branch.Users != nil {
 		// Если есть пользователи, создаю блок заголовка
 		_, err := file.WriteString(

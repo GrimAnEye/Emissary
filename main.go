@@ -1,16 +1,16 @@
 package main
 
 import (
-	c "Emissary/configs"
-	l "Emissary/ldap"
-	t "Emissary/tree"
 	"flag"
 	"fmt"
 	"os"
+
+	c "Emissary/configs"
+	l "Emissary/ldap"
+	t "Emissary/tree"
 )
 
 func init() {
-
 	// Инициализирую ключи программы
 	flag.StringVar(&c.Login, "l", "", c.CLogin)
 	flag.StringVar(&c.Pass, "p", "", c.CPass)
@@ -27,7 +27,6 @@ func init() {
 }
 
 func main() {
-
 	// Запрашиваю аргументы командной строки и проверяю их наличие
 	flag.Parse()
 	if c.Login == "" || c.Pass == "" ||
@@ -51,5 +50,4 @@ func main() {
 		fmt.Printf("При создании файла вывода справочника возникла ошибка:\n%s\n", err)
 		os.Exit(1)
 	}
-
 }
