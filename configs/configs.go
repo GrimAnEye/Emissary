@@ -25,26 +25,28 @@ type (
 var (
 	// Запрашиваемые переменные от пользователя
 
-	Login          string // Имя пользователя для доступа к LDAP
+	User           string // Имя пользователя для доступа к LDAP
 	Pass           string // Пароль пользователя для доступа к LDAP
 	LdapServer     string // Адрес LDAP сервера
 	LdapBaseDn     string // Базовый каталог LDAP для поиска
 	LdapFilter     string // LDAP фильтр для поиска пользователей
 	LdapSkipRegexp string // Пропускает пользователя, если его DN удовлетворяет регулярному выражению
 	Output         string // Путь до файла вывода телефонного справочника
+	Log            string // Уровень журнала - error,[info],debug
 
 )
 
 const (
 	// Описание запрашиваемых переменных
 
-	CLogin          string = "Имя пользователя для доступа к LDAP: user@domain.com"
+	CUser           string = "Имя пользователя для доступа к LDAP: user@domain.com"
 	CPass           string = "Пароль пользователя для доступа к LDAP"
 	CLdapServer     string = "Адрес LDAP сервера в формате: ldaps://ldap.example.com:389"
 	CLdapBaseDn     string = "Базовый каталог LDAP для поиска: OU=Users,DC=exa,DC=example,DC=com"
 	CLdapFilter     string = "LDAP фильтр для поиска пользователей: (objectClass=organizationalPerson)"
 	CLdapSkipRegexp string = "Пропускает пользователя, если его DN удовлетворяет регулярному выражению"
 	COutput         string = "Путь до файла вывода телефонного справочника"
+	CLog            string = "Уровень журнала - error,[info],debug"
 
 	CUsage string = `Emissary - программа офисной техподдержки,
 	формирующая HTML страницу "телефонного" справочника пользователей

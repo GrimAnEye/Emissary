@@ -24,7 +24,7 @@ var requestAttributes = []string{
 func GetUsersFromLdap() (users []c.LdapAttributes, err error) {
 	slog.Debug("Подключаюсь к LDAP",
 		slog.String("ldapServer", c.LdapServer),
-		slog.String("ldapUser", c.Login),
+		slog.String("ldapUser", c.User),
 		slog.String("ldapFilter", c.LdapFilter),
 		slog.String("ldapBase", c.LdapBaseDn),
 		slog.Any("ldapRequestAttributes", requestAttributes),
@@ -39,7 +39,7 @@ func GetUsersFromLdap() (users []c.LdapAttributes, err error) {
 	defer l.Close()
 
 	// Использование УЗ для подключения
-	err = l.Bind(c.Login, c.Pass)
+	err = l.Bind(c.User, c.Pass)
 	if err != nil {
 		return nil, err
 	}
@@ -78,9 +78,7 @@ func GetUsersFromLdap() (users []c.LdapAttributes, err error) {
 		if c.LdapSkipRegexp != "" {
 			skips := re.FindAllStringSubmatch(entry.DN, -1)
 			if len(skips) > 0 {
-				slog.Info("Совпадение пропуска",
-					slog.Any("regStrings", skips),
-					slog.String("user", entry.DN))
+				slog.Info("Пропускаю", slog.Any("regStrings", skips), slog.String("user", entry.DN))
 				continue
 			}
 		}

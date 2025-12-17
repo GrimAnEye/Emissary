@@ -13,13 +13,14 @@ import (
 
 func init() {
 	// Инициализирую ключи программы
-	flag.StringVar(&c.Login, "l", "", c.CLogin)
+	flag.StringVar(&c.User, "u", "", c.CUser)
 	flag.StringVar(&c.Pass, "p", "", c.CPass)
 	flag.StringVar(&c.LdapServer, "s", "", c.CLdapServer)
 	flag.StringVar(&c.LdapBaseDn, "b", "", c.CLdapBaseDn)
 	flag.StringVar(&c.LdapFilter, "f", "", c.CLdapFilter)
 	flag.StringVar(&c.LdapSkipRegexp, "r", "", c.CLdapSkipRegexp)
 	flag.StringVar(&c.Output, "o", "Emissary.html", c.COutput)
+	flag.StringVar(&c.Log, "l", "info", c.CLog)
 
 	flag.Usage = func() {
 		fmt.Fprintf(flag.CommandLine.Output(), c.CUsage+"\n\n")
@@ -30,8 +31,18 @@ func init() {
 func main() {
 	// Запрашиваю аргументы командной строки и проверяю их наличие
 	flag.Parse()
-	if c.Login == "" || c.Pass == "" ||
-		c.LdapServer == "" || c.LdapBaseDn == "" || c.LdapFilter == "" {
+
+	var slogLevel slog.Level
+	err := slogLevel.UnmarshalText([]byte(c.Log))
+	if err == nil {
+		opts := slog.HandlerOptions{
+			Level: slogLevel,
+		}
+		logger := slog.New(slog.NewTextHandler(os.Stdout, &opts))
+		slog.SetDefault(logger)
+	}
+
+	if c.LdapServer == "" || c.LdapBaseDn == "" || c.LdapFilter == "" {
 		flag.Usage()
 		panic(c.CErr)
 	}
