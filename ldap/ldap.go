@@ -1,7 +1,8 @@
 package ldap
 
 import (
-	"fmt"
+	"log/slog"
+	"regexp"
 	"strings"
 
 	c "Emissary/configs"
@@ -21,27 +22,24 @@ var requestAttributes = []string{
 
 // GetUsersFromLdap - запрашивает пользователей из LDAP и возвращает их список
 func GetUsersFromLdap() (users []c.LdapAttributes, err error) {
-	fmt.Println("Подключаюсь к LDAP")
+	slog.Debug("Подключаюсь к LDAP",
+		slog.String("ldapServer", c.LdapServer),
+		slog.String("ldapUser", c.Login),
+		slog.String("ldapFilter", c.LdapFilter),
+		slog.String("ldapBase", c.LdapBaseDn),
+		slog.Any("ldapRequestAttributes", requestAttributes),
+		slog.String("ldapSkipRegexp", c.LdapSkipRegexp),
+	)
 
 	// Формирование подключения к ldap
-	l, err := ldap.Dial("tcp", c.LdapServer)
+	l, err := ldap.DialURL(c.LdapServer)
 	if err != nil {
 		return nil, err
 	}
 	defer l.Close()
 
 	// Использование УЗ для подключения
-	err = l.Bind(
-		// Проверка наличия домена LDAP. Если он есть, использовать с логином
-		func() string {
-			if c.LdapDomain == "" {
-				return c.Login
-			} else {
-				return c.Login + "@" + c.LdapDomain
-			}
-		}(),
-
-		c.Pass)
+	err = l.Bind(c.Login, c.Pass)
 	if err != nil {
 		return nil, err
 	}
@@ -54,8 +52,7 @@ func GetUsersFromLdap() (users []c.LdapAttributes, err error) {
 		requestAttributes,
 		nil,
 	)
-
-	fmt.Println("Запрашиваю пользователей")
+	slog.Debug("Запрашиваю пользователей")
 
 	// Выполнение запроса в AD
 	sr, err := l.Search(searchRequest)
@@ -63,13 +60,31 @@ func GetUsersFromLdap() (users []c.LdapAttributes, err error) {
 		return nil, err
 	}
 
-	fmt.Printf("Вернулось %v пользовател(я/ей)\n", len(sr.Entries))
+	slog.Info("Успешный запрос ldap", slog.Int("objectsCount", len(sr.Entries)))
 
 	// Инициализирую массив пользователей и складываю в него данные
 	users = make([]c.LdapAttributes, 0)
 
+	// Подготовка регурярки для дополнительного пропуска пользователей
+	re := &regexp.Regexp{}
+	if c.LdapSkipRegexp != "" {
+		re, err = regexp.Compile(c.LdapSkipRegexp)
+		if err != nil {
+			return nil, err
+		}
+	}
 	// Прохожусь по всем сущностям и формирую список пользователей
 	for _, entry := range sr.Entries {
+		if c.LdapSkipRegexp != "" {
+			skips := re.FindAllStringSubmatch(entry.DN, -1)
+			if len(skips) > 0 {
+				slog.Info("Совпадение пропуска",
+					slog.Any("regStrings", skips),
+					slog.String("user", entry.DN))
+				continue
+			}
+		}
+
 		var user c.LdapAttributes
 
 		// Должность пользователя

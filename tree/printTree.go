@@ -2,6 +2,7 @@ package tree
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
 
 	c "Emissary/configs"
@@ -24,8 +25,7 @@ func PrintTree(tree *c.Branch) error {
 	if err := initFile(file, false); err != nil {
 		return err
 	}
-
-	fmt.Println("Вывод данных в файл окончен. Имя справочника: ", c.Output)
+	slog.Info("Успешно", slog.String("outputFilename", c.Output))
 
 	return nil
 }

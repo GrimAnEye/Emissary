@@ -1,7 +1,7 @@
 package tree
 
 import (
-	"fmt"
+	"log/slog"
 	"strings"
 
 	c "Emissary/configs"
@@ -9,7 +9,7 @@ import (
 
 // MakeTree - формирует дерево из массива пользователей
 func MakeTree(users []c.LdapAttributes) (tree c.Branch) {
-	fmt.Println("Формирую дерево пользователей по отделам")
+	slog.Debug("Формирую дерево ldap объектов")
 
 	// Перебираем массив пользователей
 	for _, user := range users {
@@ -50,7 +50,7 @@ func addUser(branch *c.Branch, user *c.LdapAttributes) {
 	if _, ok := branch.Users[user.Name]; !ok {
 		branch.Users[user.Name] = c.BranchAttributes{
 			Position: user.Position,
-			Contacts: strings.Join(user.Contacts, ","),
+			Contacts: strings.Join(user.Contacts, ", "),
 		}
 	}
 }

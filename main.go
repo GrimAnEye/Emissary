@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"log/slog"
 	"os"
 
 	c "Emissary/configs"
@@ -14,10 +15,10 @@ func init() {
 	// Инициализирую ключи программы
 	flag.StringVar(&c.Login, "l", "", c.CLogin)
 	flag.StringVar(&c.Pass, "p", "", c.CPass)
-	flag.StringVar(&c.LdapDomain, "d", "", c.CLdapDomain)
 	flag.StringVar(&c.LdapServer, "s", "", c.CLdapServer)
 	flag.StringVar(&c.LdapBaseDn, "b", "", c.CLdapBaseDn)
 	flag.StringVar(&c.LdapFilter, "f", "", c.CLdapFilter)
+	flag.StringVar(&c.LdapSkipRegexp, "r", "", c.CLdapSkipRegexp)
 	flag.StringVar(&c.Output, "o", "Emissary.html", c.COutput)
 
 	flag.Usage = func() {
@@ -38,7 +39,7 @@ func main() {
 	// Запрашиваю пользователей из LDAP
 	users, err := l.GetUsersFromLdap()
 	if err != nil {
-		fmt.Printf("При запросе пользователей в LDAP произошла ошибка:\n%s\n", err)
+		slog.Error("Ошибка при запросе в LDAP", slog.Any("err", err))
 		os.Exit(1)
 	}
 
@@ -47,7 +48,7 @@ func main() {
 
 	// Вывожу дерево пользователей в файл
 	if err := t.PrintTree(&tree); err != nil {
-		fmt.Printf("При создании файла вывода справочника возникла ошибка:\n%s\n", err)
+		slog.Error("Ошибка при выводе справочника в файл", slog.Any("err", err))
 		os.Exit(1)
 	}
 }
