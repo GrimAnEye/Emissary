@@ -99,7 +99,10 @@ func printBranch(branch *c.Branch, file *os.File, isStart bool) error {
 			return err
 		}
 		// Начинаю выводить в него пользователей
-		printUsers(&branch.Users, file)
+		err = printUsers(&branch.Users, file)
+		if err != nil {
+			return err
+		}
 	}
 
 	if branch.Branch != nil {

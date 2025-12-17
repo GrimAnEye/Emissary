@@ -40,7 +40,7 @@ const (
 	// Описание запрашиваемых переменных
 
 	CUser           string = "Имя пользователя для доступа к LDAP: user@domain.com"
-	CPass           string = "Пароль пользователя для доступа к LDAP"
+	CPass           string = "Пароль пользователя для доступа к LDAP" //gosec:disable G101 -- Ошибка анализатора
 	CLdapServer     string = "Адрес LDAP сервера в формате: ldaps://ldap.example.com:389"
 	CLdapBaseDn     string = "Базовый каталог LDAP для поиска: OU=Users,DC=exa,DC=example,DC=com"
 	CLdapFilter     string = "LDAP фильтр для поиска пользователей: (objectClass=organizationalPerson)"
